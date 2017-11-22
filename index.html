@@ -1,7 +1,481 @@
-<!DOCTYPE html>
-<html>
-<body>
-<h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
-</body>
-</html>
+@ECHO OFF
+REM *** SolidCore Installation for Veyron
+REM *** Created on February 22, 2016 by Sagar Chandrashekar
+
+REM *** SolidCore Configuration Constraints listed below:
+REM *** 1. Checksum of a Script cannot be made as an updater with sadmin auth -u (updater switch). Checksum of a binary (.dll, exe etc) file can be made as an updater with sadmin auth -u switch.
+REM *** 2. For a Script or Binary file to be declared as an updater using "sadmin updater" switch, they should be under Whitelist. 
+REM *** 3. To support DLL relocation of a whitelisted file, use sadmin attr -v switch
+REM *** 4. To allow a Script or Binary not in the Whitelist to execute, use sadmin attr -d "name of Binary or Script" switch.
+REM *** 5. To allow deletion of a file or folder (remove write protection) in Whitelist by a non updater process, use sadmin skiplist add -d \folderpath or sadmin skiplist add -d \filename
+REM *** 6. Use sadmin skiplist -f switch to remove file operation restrictions. Use sadmin skiplist add -r to remove registry write protection restriction.
+REM *** 7. To allow execution of a binary or script not in the Whitelist, use sadmin -a -c "checksum" switch. Checksum is the `` of the file to be executed.
+REM *** 8. Use sadmin cert add -u "*.cer" switch to add digital certificate as an updater. 
+REM *** 9. Use sadmin updaters add -d "parentprocessname" to exclude the child processes from inheriting the updater permissions from parent process.
+REM *** 10. Any installer not part of the Whitelist can be executed or installed by digitally signing them before installation.
+
+echo ******************************************************
+echo **  BEGINNING INSTALLATION PROCESS. PLEASE WAIT...  **
+echo **  Platform:Windows 7 Version:8.0.0.855 Dated:October 20th NOV 2017. **
+echo ******************************************************
+set TIMESTAMP=%time:~0,2%:%time:~3,2%:%time:~6,2%
+echo Solidcore Install Begins at %TIMESTAMP% >C:\Temp\SCInstallTime.txt
+CALL setup-win-7-2008r2-amd64-8.0.0.855 /s /v" /qn "SERIALNUMBER=0710-2208-1402-0108-2708" SHORTCUT=0 INSTALLDIR=\"C:\\Program Files\\McAfee\\Solidcore\" /l+*v "%SYSTEMROOT%\S3Setup.log""
+ECHO.
+echo *****************************************************************
+echo **           INSTALL COMPLETE.                                 **
+echo *****************************************************************
+set TIMESTAMP2=%time:~0,2%:%time:~3,2%:%time:~6,2%
+echo Solidcore Install Ends at %TIMESTAMP2% >>C:\Temp\SCInstallTime.txt
+ECHO.
+
+REM *** Copy Script required to clean old logs
+COPY forfiles.vbs C:\Pms\UserScripts
+@ECHO OFF
+
+REM *** Get Solidification time
+set TIMESTAMP3=%time:~0,2%:%time:~3,2%:%time:~6,2%
+echo System Solidification Started at %TIMESTAMP3% >>C:\Temp\SCInstallTime.txt
+
+REM *** SOLIDIFY the agent
+echo *******************************************************************************
+echo **  BEGINNING SOLIDIFICATION PROCESS. ...  **
+echo *******************************************************************************
+ECHO.
+echo FOR YOUR REFERENCE THIS PROCESS WAS BEGUN AT %NOW%.
+ECHO.
+C:\"Program Files"\McAfee\Solidcore\sadmin so
+ECHO.
+set TIMESTAMP4=%time:~0,2%:%time:~3,2%:%time:~6,2%
+echo System Solidification Ends at %TIMESTAMP4% >>C:\Temp\SCInstallTime.txt
+ECHO.
+
+REM *** Adding Updaters***
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add -t PRINTER1 spoolsv.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add C:\Windows\System32\takeown.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add C:\Pms\UserScripts\SetWord2007ForTheFirstUse.vbs
+
+REM ***Add JS and HTA files to the list of protected scripts***
+C:\"Program Files"\McAfee\Solidcore\sadmin scripts add .js cscript.exe wscript.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin scripts add .hta mshta.exe
+
+REM ***Whitelisting HTA files***
+C:\"Program Files"\McAfee\Solidcore\sadmin so C:\usr\diamond.root\bin\ServiceTools\index.hta
+C:\"Program Files"\McAfee\Solidcore\sadmin so C:\usr\diamond.root\bin\security\UpdateKey.hta
+C:\"Program Files"\McAfee\Solidcore\sadmin so C:\usr\diamond.root\bin\BrowserUts.hta
+C:\"Program Files"\McAfee\Solidcore\sadmin so C:\usr\diamond.root\bin\security\mapDrive.hta
+C:\"Program Files"\McAfee\Solidcore\sadmin so C:\usr\diamond.root\bin\security\ComputerAndNetworkConfiguration.hta
+C:\"Program Files"\McAfee\Solidcore\sadmin so C:\usr\diamond.root\bin\security\GetSetGantryRegistry.hta
+C:\"Program Files"\McAfee\Solidcore\sadmin so C:\usr\diamond.root\bin\security\RestoreFromBackup.hta
+C:\"Program Files"\McAfee\Solidcore\sadmin so C:\Misc\mapDriveV.hta
+C:\"Program Files"\McAfee\Solidcore\sadmin so C:\Pms\Manual\iCT4_languages.hta
+C:\"Program Files"\McAfee\Solidcore\sadmin so C:\Misc\Policies.hta
+C:\"Program Files"\McAfee\Solidcore\sadmin so D:\SYSTEM\Install\main.hta
+C:\"Program Files"\McAfee\Solidcore\sadmin so D:\SYSTEM\Install\PleaseWait.hta
+C:\"Program Files"\McAfee\Solidcore\sadmin so D:\SYSTEM\Install\BrowseForFolder.hta
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t couchtype.hta -c "a9a175332a4ba784bc0e85c5086959e373c57063"
+
+REM ***1-Click Checksums******************************************************************************************
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t AUTORUN.BAT -u -c "554de5d42f4fe329ccd04fd9ed1e105e700a4035"
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t AUTORUN.VBS -u -c "2399ed593e9f8b12325dbc0cb24c12aab88b34be"
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t SETUP.EXE -u -c "63bc478db786e9df60996a62993cc33ed720e0bd"
+REM ***PHILIPS Folder***
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t SETUP.VBS -u -c "80530976c8f224e903ef395280443c1cb026d428"
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t ADDITIONALSETTINGS.VBS -u -c "8d7050b6bff00948ff3ef1e46cb8d3bbda5b8940"
+
+REM *** Attributes to run Dicom images from CD ***
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -a PMSDView.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add PmsDView.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -a RunDlg.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t autorun.exe -c "A4DB722E7955A27712E54EE8E87BF6EF886B038F"
+
+REM *** Adding rules for V Drive ***
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -a CreateMapDrive.vbs
+C:\"Program Files"\McAfee\Solidcore\sadmin skiplist add -d \CreateMapDrive.vbs
+
+REM *** ADD Updaters rules for .Net Framework 1.1, 2.0, 3.0 and 4.0***
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add -t .NETFrame1 aspnet_wp.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add -t .NETFrame2 ConfigWizards.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add -t .NETFrame3 mscorsvw.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add -t .NETFrame4 netfxupdate.exe
+
+REM *** Adding rules for ASP.NET Framework...
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add -t ASP1 w3wp.exe
+
+REM ***Upgrade SetUp or Typical Installation***
+C:\"Program Files"\McAfee\Solidcore\sadmin skiplist add -d \system\install\
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add 1ClickProgress.exe
+REM ***Updater permissions***
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add AdamInstaller.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add AuditLogBackup.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add AuditLogViewer.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add AVAapp.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add AVAprep.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add AutoSpine.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add BugRep.BugRepViewer.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add BMAP.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add BrainPerfusionApp.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Bugrep.SilentCollector.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ConsoleServiceabilityService.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add csc.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add CallMatTools.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ConsoleHowDoI.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add CardiacServer.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add CirsServiceability.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ConsoleIdleDetector.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ConsoleGantry32BitServer.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add CompileClips.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add CalciumScoring.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add CardiacViewer.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add CCAPreprocessing.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add copsshadm.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add CANMSEngine.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add DoseLogViewer.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add DataAcquisitionBridge.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add DataProcessingBridge.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add DeleteTempDevice.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add DBIntegrityCheck.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add drvinst.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add DmsSubsystemWcfHoster.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Display_Cal_Gui.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add DmsGoldFileMerger.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add DoseManagementOfflineRunner.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ExamManager.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ExamCardManager.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ExamManagerRecoveryApp.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ExamEditor.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ECRestore.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ExamApplication.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add FilmViewApp.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add FunctionalCT.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add GantryServices.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add GantryCalibWCFHost.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add GantryWCFSelfHostedServices.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add GantryConfig.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add HostGantryService.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Home.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ImportUtilityGUI.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add LungDensity.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add LiverPreProc.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Liver.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add LogFileCompressor.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Lanconfig.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add LoggerSvc.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add LungNodules.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add LoginApplication.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add LoadSpectralAlg.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add LogConfigurator.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add LogViewer.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ManualBadDetector.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add MessageService.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add MANAGENETWORKADAPTER.EXE
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add MDUEditor.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add order_enable.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add order_disable.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add order_disable3600.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.PmsCT.Service.LogConverterService.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.ServicePlatform.ServiceManager.ServiceHostApplication.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.PmsCT.InterfaceLockProgramWatcher.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.PmsCT.InterfaceLockUtility.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.PmsCT.AdminTool.ScreenSaverUtil.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.ServiceTools.RAC.RdpWatchdog.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add PmsPrintingService.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add PmsRemotingService.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.ServicePlatform.ServiceManager.ServiceHostController.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.PH.GCS.M2M.ADT.DFC.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add PmsWindowsPrinting.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add PhysicsData.Server.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Physics.Analysis.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.PmsCT.Service.AutomaticDownloadApplication.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Physics.CalibrationUpgradeUtility.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Physics.GraphView.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Physics.OfflineRawProcessingApp.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.PmsCT.AdminTool.Hosting.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.ServicePlatform.CrashRecovery.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.ServicePlatform.SystemRebootProcess.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.ServiceTools.Rdp.UIServerPluginHost.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.ServiceTools.RAC.UIApp.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Physics.GantryServerWrapper.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.PmsCT.TSLHost.TslUI.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add pulmonaryviewer.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.PmsCT.Service.RCS.UI.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add PatientDirectory.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.ServicePlatform.HostingApplication.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Physics.QualityAssurance.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.PmsCT.Service.RCS.Controller.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Philips.PmsCT.Service.SubSystemReset.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add PrintingServer.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add PetPro.HostBridge.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add PET.Service.Tools.ServiceLogBridge.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add PetPro.PetProMultiHostService.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add PETCal.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add PetPro.SystemConfigurationService.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add PowerControl.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add qsaMain.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add QueueManager.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add QuickReview.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ResultsEngineExe.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ReconServer.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ReportEditor.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add RegressionClient.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add RepositoryGenerator.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ReconDeviceStub.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add RemotingServer.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add SnagitPI64.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add SMSvcHost.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add SFDebugDialog.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ScannerFrameworkWinService.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Spectral.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add spalg.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add sdiagnhost.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ScannerFrameworkWinApp.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Service.Tools.ClinicalBugRep.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Service.Tools.BackupRestore.UI.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Service.Tools.AlertGenerator.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Service.Infrastructure.ServiceManager.CTServiceManager.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Service.PropertyMonitoring.DSHoster.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ScanServiceHost.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Service.Tools.Cat32BitWrapper.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Service.Tools.SemiAutoInstaller.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Service.Tools.SDCService.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Service.Tools.UpgradeUtility.UpgradeUtility.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Service.Tools.ClinicalBackupRestore.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Service.Tools.GLP.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Service.Infrastructure.CTServiceHostingApp.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add TrustedInstaller.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add TemperatureNotification.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add taskhost.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add TSMSIhlp.EXE
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add TemplateEditor.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add UserActivationWizard.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add UserManagementUI.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add UnmanagedBridge.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add UniformityAnalyzerController.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add vbc.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add VoiceManager.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add ViewTwo.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add VCApplication.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add VCPreprocess.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add vcredist_x86.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add vcredist_x64.exe
+
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add WatchDogService.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add WmiPrvSE.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add Workflow.exe
+
+REM *** Mat Lab***
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add MatTools_repair.bat
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t vcredistx86msi -u -c "1a49e0f10860c0669123dbe089b826e89f8039e8"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add CallMatTools.exe
+
+REM *** IntelliSpacePortal***
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add PortalClientUpdate.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add PortalLoginApplication.exe
+
+REM *** Microsoft specific tools***
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add -d msdt.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add -d WinSAT.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add MpCmdRun.exe
+
+REM *** Automation updaters for Veyron***
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add -d NexStarAnalysisController.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add -d Easy.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add -d PowerControlService.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add -d Service.Tools.ProductInfoFileCreator.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add -d PetPro.ConsoleHealthMonitor.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add -d NexStarReviewController.exe
+REM *** Add 1-click CHECKSUMS and Updaters***
+CALL C:\Temp\SolidCore\1ClickCheckSums.bat
+del C:\Temp\SolidCore\1ClickCheckSums.bat /Q /S
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t install.vbs -c "068185513ff11a6463807a499c7a49495e8a2eab"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add PHCT_Scanner_Dev.msi
+
+REM ***IST 6020 DRIVERS CHECKSUMS***
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t cxbu0x64.sys -c "97861838bfc14a060cb2f1a9cf0d689a161b00ea"
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t loop.sys -c "346a3b494a31c2fbd12a4a34627e4e15f7c310ff"
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t scfilter.sys -c "a2dc151ade334e0fd30c0e09223038e1afcbf7ee"
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t winusb.sys -c "789b9a9dce670656d90509d79d654a9d28be6d17"
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t wudfrd.sys -c "01c65d6439fcfd2ab4e39aa331def52df27a6d64"
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t wudfusbcciddriver.dll -c "67cae183768836b5012729000089079676b61ff9"
+
+REM ***DIACAP CHECKSUMS*** C:\Program Files(x86)\DIACAP\***
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t highrisk_secuirty_settings.vbs -c "7e3064173f4de0d063b364cd4ecdbce6cb60901c"
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t setdodspecific.bat -c "d90c5c7b4229f605e3f7894bf2a41c68632dabea"
+
+REM ***IFB Driver Installation***
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t dseo13b.exe -u -c "d7922f2dcb47a37cf798dffb824f840ddef7ffd5"
+
+REM ***Attributes for DLL relocation(VASR) for ICW ***
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v cygrunsrv.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v cygwin1.dll
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v sshd.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v bash.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v cygpath.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v grep.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v ls.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v sftp-server.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v cygcheck.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v sh.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v mkdir.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v cat.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v pwd.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v rm.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v tar.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v cp.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v chmod.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v gzip.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v mv.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v ln.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v sftp.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v egrep.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v false.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v cut.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v tr.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v umount.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v xxd.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v u2d.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v ssh-keyscan.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v mount.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v wc.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v d2u.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v ssh-agent.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v ssh-add.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v ssh-keysign.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v touch.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v ps.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v ssh.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v chown.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v date.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v tail.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v mkpasswd.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v ssh-keygen.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v id.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v mkgroup.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v copsshcp.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v dir.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin attr add -v sed.exe
+
+REM *** Configure Skiplist(remove write protection -d, file operations -f)***
+C:\"Program Files"\McAfee\Solidcore\sadmin skiplist add -df \SetRegionalSettings_ct.vbs
+C:\"Program Files"\McAfee\Solidcore\sadmin skiplist add -df \SetRegionalSettings.vbs
+C:\"Program Files"\McAfee\Solidcore\sadmin skiplist add -df \BugRep.BugRepViewer.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin skiplist add -d \ActivateUser.bat
+C:\"Program Files"\McAfee\Solidcore\sadmin skiplist add -d \Disablebootmenu.vbs
+C:\"Program Files"\McAfee\Solidcore\sadmin skiplist add -d \Base.dll
+C:\"Program Files"\McAfee\Solidcore\sadmin skiplist add -d \ISTAM.dll
+C:\"Program Files"\McAfee\Solidcore\sadmin skiplist add -d \AutoStorePerformer.dll
+C:\"Program Files"\McAfee\Solidcore\sadmin skiplist add -d \7z.dll
+C:\"Program Files"\McAfee\Solidcore\sadmin skiplist add -d \Service.Infrastructure.ClientUtilities.dll
+C:\"Program Files"\McAfee\Solidcore\sadmin skiplist add -d \DevExpress.Data3.DLL
+C:\"Program Files"\McAfee\Solidcore\sadmin skiplist add -d \DevExpress.Utils3.DLL
+
+REM *** Removing Default Updaters
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	apache.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	"Apple Software Update\softwareupdate.exe"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	"ePolicy Orchestrator\EventParser.exe"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	"ePolicy Orchestrator\Server\bin\tomcat5.exe"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	"ePolicy Orchestrator\Server\bin\tomcat7.exe"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	FCAgent.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	FCPatchInstallAgent.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	firesvc.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	FlashplayerUpdateService.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	FramePkg.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	Frameworkservice.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	FSAssessment.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	FSDiscovery.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	FSScanCtrlSvc.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	FSScanEngineSvc.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	HIPSvc.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	HtmlDlg.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	"iexplore.exe mcinsctl.dll"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	"iexplore.exe QCClient.UI.Core.dll"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	"Java\Java Update\jucheck.exe"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	"Java\Java Update\jusched.exe"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	macmnsvc.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	macompatsvc.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	masvc.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	MBExplorer.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	"McAfee\Real Time\rtclient.exe"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	Mcappins.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	McCHSvc.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	mcmnhdlr.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	mcods.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	McSACore.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	McScript.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	McScript_InUse.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	McShield.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	McSvHost.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	McTELSvc.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	McTELUpd.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	McTray.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	Mcupdate.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	Mcupdmgr.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	McVSEscn.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	Mcvsrte.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	mcvsshld.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	Mghtml.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	"Mozilla Maintenance Service\maintenanceservice.exe"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	msmdsrv.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	Msshield.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	mvserver.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	myAgtSvc.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	"NVIDIA Corporation\NVIDIA Update Core\daemonu.exe"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	RPCServ.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	RSSensor.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	scan32.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	SqlWb.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	"Supportability\MVT\MvtApp.exe"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	udaterui.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	"VirusScan Enterprise\VsTskMgr.exe"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	"VirusScan Enterprise\x64\EngineServer.exe"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	"VirusScan Enterprise\x64\Scan64.exe"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	vnctool.exe
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters remove	webfldrs.msi
+
+REM ***Changes for Sowmya(Mapdrivev).***
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t CreateMapDrive.vbs -c "dae680c47ad45f09acd15e377cf6b773bd2ee71f"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add -d CreateMapDrive.vbs
+C:\"Program Files"\McAfee\Solidcore\sadmin auth -a -t DeleteMapDriveV.vbs -c "CD67ADB633B60E93E8CA9F69EBEC02C1E6F4A2FE"
+C:\"Program Files"\McAfee\Solidcore\sadmin updaters add -d DeleteMapDriveV.vbs
+
+REM ***Disable Not Required features***
+C:\"Program Files"\McAfee\Solidcore\sadmin features disable execution-control
+C:\"Program Files"\McAfee\Solidcore\sadmin features disable mp-casp
+C:\"Program Files"\McAfee\Solidcore\sadmin config set IsInvbackupEnabled=0
+
+REM ***Configure Final Certificates***
+C:\"Program Files"\McAfee\Solidcore\sadmin cert add -u "C:\Temp\SolidCore\MACVEYUPDATE.cer"
+C:\"Program Files"\McAfee\Solidcore\sadmin cert add "C:\Temp\SolidCore\MACVEYEXECUTE.cer"
+C:\Windows\System32\CERTUTIL.exe -addstore -enterprise -f -v root "C:\Temp\SolidCore\MACROOTCA.cer"
+
+REM ***Configure Final Common Certificates***
+C:\"Program Files"\McAfee\Solidcore\sadmin cert add -u "C:\Temp\SolidCore\MACALLUPDATE.cer"
+C:\"Program Files"\McAfee\Solidcore\sadmin cert add "C:\Temp\SolidCore\MACALLEXECUTE.cer"
+
+REM ***Enable Protection***
+C:\"Program Files"\McAfee\Solidcore\sadmin enable
+
+REM *** Set Solidcore.log file size to 1MB and number of files created to 10***
+C:\"Program Files"\McAfee\Solidcore\sadmin config set LogFileSize=1024
+C:\"Program Files"\McAfee\Solidcore\sadmin config set LogFileNum=10
+
+REM *** Apply Password***
+COPY passwd "C:\Program Files\McAfee\Solidcore"
